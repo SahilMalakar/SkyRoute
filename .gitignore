@@ -6,4 +6,4 @@ combined.log
 
 dist/
 
-src\db\generated\prisma
+src/db/generated/prisma
