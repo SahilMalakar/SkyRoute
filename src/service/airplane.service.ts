@@ -22,3 +22,49 @@ export async function createAirplane(data: CreateAirplaneInput) {
     throw error;
   }
 }
+
+export async function getAirplane() {
+  try {
+    return await airplaneRepository.findAll();
+  } catch (error: any) {
+    throw new AppError(
+      "Cannot fetch data of all airplanes",
+      status.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+export async function getAirplaneById(id: number) {
+  try {
+    return await airplaneRepository.findById(id);
+  } catch (error: any) {
+    if (error.statusCode === status.NOT_FOUND) {
+      throw new AppError(
+        "This airplane u requested is not present",
+        status.NOT_FOUND,
+      );
+    }
+    throw new AppError(
+      "Cannot fetch data of this airplanes",
+      status.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+export async function deleteAirplaneById(id: number) {
+    try {
+      return await airplaneRepository.deleteById(id);
+    } catch (error: any)  {
+      if (error instanceof AppError && error.statusCode === status.NOT_FOUND) {
+        throw new AppError(
+          "This airplane you requested to delete is not present",
+          status.NOT_FOUND,
+        );
+      }
+
+      throw new AppError(
+        "Cannot delete data of this airplane",
+        status.INTERNAL_SERVER_ERROR,
+      );
+    }
+}

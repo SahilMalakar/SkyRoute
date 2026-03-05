@@ -1,4 +1,7 @@
+import status from "http-status";
 import { logger } from "../config/logger.js";
+import { AppError } from "../utils/AppError.js";
+import { Prisma } from "../db/generated/prisma/client.js";
 
 type PrismaModelDelegate = {
   create(args: any): Promise<any>;
@@ -17,12 +20,7 @@ export default class CrudRepository<T extends PrismaModelDelegate> {
   }
 
   async create(data: any) {
-    try {
-      return await this.model.create({ data });
-    } catch (error) {
-      logger.error("Error in CrudRepository - create method", error);
-      throw error;
-    }
+    return await this.model.create({ data });
   }
 
   async deleteById(id: number) {
@@ -31,40 +29,35 @@ export default class CrudRepository<T extends PrismaModelDelegate> {
         where: { id },
       });
     } catch (error) {
-      logger.error("Error in CrudRepository - deleteById method", error);
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new AppError("Resource not found", status.NOT_FOUND);
+      }
+
       throw error;
     }
   }
 
   async findById(id: number) {
-    try {
-      return await this.model.findUnique({
-        where: { id },
-      });
-    } catch (error) {
-      logger.error("Error in CrudRepository - findById method", error);
-      throw error;
+    const response = await this.model.findUnique({
+      where: { id },
+    });
+    if (!response) {
+      throw new AppError("Not able to find the resource", status.NOT_FOUND);
     }
+    return response;
   }
 
   async findAll() {
-    try {
-      return await this.model.findMany();
-    } catch (error) {
-      logger.error("Error in CrudRepository - findAll method", error);
-      throw error;
-    }
+    return await this.model.findMany();
   }
 
   async updateById(id: number, data: any) {
-    try {
-      return await this.model.update({
-        where: { id },
-        data,
-      });
-    } catch (error) {
-      logger.error("Error in CrudRepository - updateById method", error);
-      throw error;
-    }
+    return await this.model.update({
+      where: { id },
+      data,
+    });
   }
 }

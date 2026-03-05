@@ -16,3 +16,7 @@ export const createAirplaneSchema = z.object({
 // This is compile-time only.
 // It disappears after TypeScript compiles.
 export type CreateAirplaneInput = z.infer<typeof createAirplaneSchema>;
+
+export const getAirplaneByIdSchema = z.object({
+  id: z.coerce.number().int().positive(),
+});

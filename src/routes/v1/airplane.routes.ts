@@ -1,7 +1,12 @@
 import { Router } from "express";
-import { createAirplaneController } from "../../controllers/airplane.controller.js";
-import { validateRequest } from "../../middlewares/validator.middlwares.js";
-import { createAirplaneSchema } from "../../validations/airplane.validation.js";
+import {
+  createAirplaneController,
+  deleteAirplaneByIdController,
+  getAirplanesByIdController,
+  getAirplanesController,
+} from "../../controllers/airplane.controller.js";
+import { validateParams, validateRequest } from "../../middlewares/validator.middlwares.js";
+import { createAirplaneSchema, getAirplaneByIdSchema } from "../../validations/airplane.validation.js";
 
 const airplaneRouter: Router = Router();
 
@@ -14,4 +19,21 @@ airplaneRouter.post(
   createAirplaneController,
 );
 
+//GET : /api/v1/airplanes
+airplaneRouter.get(
+    "/airplanes",
+    getAirplanesController
+);
+
+//GET : /api/v1/airplanes/:id
+airplaneRouter.get(
+    "/airplanes/:id",
+    validateParams(getAirplaneByIdSchema),getAirplanesByIdController,
+);
+
+//DELETE : /api/v1/airplanes/:id
+airplaneRouter.delete(
+    "/airplanes/:id",
+    validateParams(getAirplaneByIdSchema),deleteAirplaneByIdController,
+);
 export { airplaneRouter };
