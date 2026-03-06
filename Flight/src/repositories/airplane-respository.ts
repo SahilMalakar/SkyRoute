@@ -4,9 +4,9 @@ import { prisma } from "../db/index.js";
 console.log(`inside repository`);
 
 export default class AirplaneRepository extends CrudRepository<
-  typeof prisma.airplane
+  typeof prisma.airline
 > {
   constructor() {
-    super(prisma.airplane);
+    super(prisma.airline);
   }
 }
