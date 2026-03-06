@@ -65,9 +65,20 @@ export default class CrudRepository<T extends PrismaModelDelegate> {
   }
 
   async updateById(id: number, data: any) {
-    return await this.model.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.model.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new AppError("Resource not found", status.NOT_FOUND);
+      }
+
+      throw error;
+    }
   }
 }

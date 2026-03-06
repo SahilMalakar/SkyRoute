@@ -69,3 +69,15 @@ export async function deleteAirplaneById(id: number) {
     );
   }
 }
+
+export async function updateAirplaneById(id : number,data:Partial<CreateAirplaneInput>) {
+  try {
+    return await airplaneRepository.updateById(id, data);
+  } catch (error: unknown) {
+    if (error instanceof AppError) {
+      throw new AppError("Requested airplane does not exist", status.NOT_FOUND);
+    }
+
+    throw new AppError("Cannot update airplane", status.INTERNAL_SERVER_ERROR);
+  }
+}

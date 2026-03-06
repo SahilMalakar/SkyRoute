@@ -17,9 +17,11 @@ export const createAirplaneSchema = z.object({
 // It disappears after TypeScript compiles.
 export type CreateAirplaneInput = z.infer<typeof createAirplaneSchema>;
 
-export const getAirplaneByIdSchema = z.object({
+export const IdSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
+
+export const updateAirplaneSchema = createAirplaneSchema.partial();
 
 export const createCitySchema = z.object({
   name: z
@@ -30,3 +32,5 @@ export const createCitySchema = z.object({
 });
 
 export type CreateCityInput = z.infer<typeof createCitySchema>;
+
+export const updateCitySchema = createCitySchema.partial();

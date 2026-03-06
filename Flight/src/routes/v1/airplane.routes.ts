@@ -4,6 +4,7 @@ import {
   deleteAirplaneByIdController,
   getAirplanesByIdController,
   getAirplanesController,
+  updateAirplaneByIdController,
 } from "../../controllers/airplane.controller.js";
 import {
   validateParams,
@@ -11,7 +12,8 @@ import {
 } from "../../middlewares/validator.middlwares.js";
 import {
   createAirplaneSchema,
-  getAirplaneByIdSchema,
+  IdSchema,
+  updateAirplaneSchema,
 } from "../../validations/zod.validation.js";
 
 const airplaneRouter: Router = Router();
@@ -31,14 +33,21 @@ airplaneRouter.get("/airplanes", getAirplanesController);
 //GET : /api/v1/airplanes/:id
 airplaneRouter.get(
   "/airplanes/:id",
-  validateParams(getAirplaneByIdSchema),
+  validateParams(IdSchema),
   getAirplanesByIdController,
 );
 
 //DELETE : /api/v1/airplanes/:id
 airplaneRouter.delete(
   "/airplanes/:id",
-  validateParams(getAirplaneByIdSchema),
+  validateParams(IdSchema),
   deleteAirplaneByIdController,
+);
+
+airplaneRouter.patch(
+  "/airplanes/:id",
+  validateParams(IdSchema),
+  validateRequest(updateAirplaneSchema),
+  updateAirplaneByIdController,
 );
 export { airplaneRouter };

@@ -5,6 +5,7 @@ import {
   deleteAirplaneById,
   getAirplane,
   getAirplaneById,
+  updateAirplaneById,
 } from "../service/airplane.service.js";
 import { successResponse } from "../utils/commonSuccess.js";
 import { errorResponse } from "../utils/commonError.js";
@@ -90,6 +91,34 @@ export async function deleteAirplaneByIdController(
       .status(status.OK)
       .json(successResponse(airplane, "Airplane deleted successfully"));
   } catch (error) {
+    if (error instanceof AppError) {
+      return res
+        .status(error.statusCode)
+        .json(errorResponse(error.message, error));
+    }
+
+    return res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json(errorResponse("Something went wrong", error));
+  }
+}
+
+
+
+// PATCH : /airplanes/:id
+
+export async function updateAirplaneByIdController(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const airplane = await updateAirplaneById(Number(id), req.body);
+
+    return res
+      .status(status.OK)
+      .json(successResponse(airplane, "Airplane updated successfully"));
+
+  } catch (error) {
+
     if (error instanceof AppError) {
       return res
         .status(error.statusCode)
