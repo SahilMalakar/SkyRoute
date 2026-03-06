@@ -1,5 +1,4 @@
 import status from "http-status";
-import { logger } from "../config/logger.js";
 import { AppError } from "../utils/AppError.js";
 import { Prisma } from "../db/generated/prisma/client.js";
 
@@ -20,7 +19,18 @@ export default class CrudRepository<T extends PrismaModelDelegate> {
   }
 
   async create(data: any) {
-    return await this.model.create({ data });
+    try {
+      return await this.model.create({ data });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new AppError("Resource already exists", status.CONFLICT);
+      }
+
+      throw error;
+    }
   }
 
   async deleteById(id: number) {

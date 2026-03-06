@@ -20,3 +20,13 @@ export type CreateAirplaneInput = z.infer<typeof createAirplaneSchema>;
 export const getAirplaneByIdSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
+
+export const createCitySchema = z.object({
+  name: z
+    .string()
+    .min(2, "City name must be at least 2 characters")
+    .max(100, "City name cannot exceed 100 characters")
+    .trim(),
+});
+
+export type CreateCityInput = z.infer<typeof createCitySchema>;
