@@ -35,6 +35,7 @@ model Airport {
   id        Int      @id @default(autoincrement())
   name      String
   code      String   @unique // example - airport code (e.g., GAU, DEL)
+  address   String
 
   cityId    Int
   city      City     @relation(fields: [cityId],references: [id],onDelete: Cascade,onUpdate: Cascade) // deleting a city removes its airports

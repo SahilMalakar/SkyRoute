@@ -22,32 +22,34 @@ console.log(`inside v1 routes`);
 
 //POST : /api/v1/airplanes
 airplaneRouter.post(
-  "/airplanes",
-  validateRequest(createAirplaneSchema),
-  createAirplaneController,
+    "/airplanes",
+    validateRequest(createAirplaneSchema),
+    createAirplaneController,
 );
 
 //GET : /api/v1/airplanes
-airplaneRouter.get("/airplanes", getAirplanesController);
+airplaneRouter.get("/airplanes",
+    getAirplanesController);
 
 //GET : /api/v1/airplanes/:id
 airplaneRouter.get(
-  "/airplanes/:id",
-  validateParams(IdSchema),
-  getAirplanesByIdController,
+    "/airplanes/:id",
+    validateParams(IdSchema),
+    getAirplanesByIdController,
 );
 
 //DELETE : /api/v1/airplanes/:id
 airplaneRouter.delete(
-  "/airplanes/:id",
-  validateParams(IdSchema),
-  deleteAirplaneByIdController,
+    "/airplanes/:id",
+    validateParams(IdSchema),
+    deleteAirplaneByIdController,
 );
 
+//PATCH : /api/v1/airplanes/:id
 airplaneRouter.patch(
-  "/airplanes/:id",
-  validateParams(IdSchema),
-  validateRequest(updateAirplaneSchema),
-  updateAirplaneByIdController,
+    "/airplanes/:id",
+    validateParams(IdSchema),
+    validateRequest(updateAirplaneSchema),
+    updateAirplaneByIdController,
 );
 export { airplaneRouter };

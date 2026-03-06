@@ -4,11 +4,10 @@ import { config } from "./config/config.js";
 import { logger } from "./config/logger.js";
 import { airplaneRouter } from "./routes/v1/airplane.routes.js";
 import { cityRouter } from "./routes/v1/city.routes.js";
-// import { userRouter } from "./routes/v1/index.js";
+import { airportRouter } from "./routes/v1/airport.routes.js";
 
 const app = express();
 
-// app.use('/api/v1',userRouter)
 app.get("/health-check", (req, res) => {
   res.status(200).json({
     msg: "Alive !!",
@@ -22,6 +21,7 @@ console.log(`inside root index.ts`);
 
 app.use("/api/v1", airplaneRouter);
 app.use("/api/v1", cityRouter);
+app.use("/api/v1", airportRouter);
 
 app.listen(config.port, () => {
   console.log(`successfully started the server on port : ${config.port}`);

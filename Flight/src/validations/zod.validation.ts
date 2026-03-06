@@ -34,3 +34,24 @@ export const createCitySchema = z.object({
 export type CreateCityInput = z.infer<typeof createCitySchema>;
 
 export const updateCitySchema = createCitySchema.partial();
+
+export const createAirportSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Airport name must be at least 3 characters")
+    .max(120),
+
+  code: z
+    .string()
+    .length(3, "Airport code must be exactly 3 characters")
+    .regex(/^[A-Z]{3}$/, "Airport code must be uppercase like GAU, DEL"),
+
+  address: z.string().min(5, "Address must be at least 5 characters").max(255),
+
+  cityId: z.number().int().positive("cityId must be a positive integer"),
+});
+
+export const updateAirportSchema = createAirportSchema.partial();
+
+export type CreateAirportInput = z.infer<typeof createAirportSchema>;
+export type UpdateAirportInput = z.infer<typeof updateAirportSchema>;

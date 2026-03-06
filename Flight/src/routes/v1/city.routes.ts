@@ -26,15 +26,15 @@ cityRouter.post(
 
 // delete : /api/v1/cities
 cityRouter.delete(
-  "/cities/:id",
-  validateParams(IdSchema),
-  deleteCityByIdController,
+    "/cities/:id",
+    validateParams(IdSchema),
+    deleteCityByIdController,
 );
 cityRouter.patch(
-  "/cities/:id",
-  validateParams(IdSchema),
-  validateRequest(updateCitySchema),
-  updateCityController
+    "/cities/:id",
+    validateParams(IdSchema),
+    validateRequest(updateCitySchema),
+    updateCityController
 );
 
 export { cityRouter };
