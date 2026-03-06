@@ -39,11 +39,19 @@ export default class CrudRepository<T extends PrismaModelDelegate> {
         where: { id },
       });
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2025"
-      ) {
-        throw new AppError("Resource not found", status.NOT_FOUND);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // record not found
+        if (error.code === "P2025") {
+          throw new AppError("Resource not found", status.NOT_FOUND);
+        }
+
+        // foreign key constraint
+        if (error.code === "P2003") {
+          throw new AppError(
+            "Resource cannot be deleted because it is referenced by another record",
+            status.BAD_REQUEST,
+          );
+        }
       }
 
       throw error;

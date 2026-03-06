@@ -56,11 +56,20 @@ export async function deleteAirportById(id: number) {
   try {
     return await airportRepository.deleteById(id);
   } catch (error: unknown) {
+    console.log(`delete error : ${error}`);
+    
     if (error instanceof AppError) {
-      throw new AppError(
-        "This airport you requested to delete is not present",
-        status.NOT_FOUND,
-      );
+      
+      if (error.statusCode === status.NOT_FOUND) {
+        throw new AppError("Airport does not exist", status.NOT_FOUND);
+      }
+
+      if (error.statusCode === status.BAD_REQUEST) {
+        throw new AppError(
+          "Airport cannot be deleted because flights are associated with it",
+          status.BAD_REQUEST,
+        );
+      }
     }
 
     throw new AppError(
