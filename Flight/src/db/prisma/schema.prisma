@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,27 +6,73 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-model Airline {
+
+
+model Airplane {
   id        Int      @id @default(autoincrement())
   model     String
   capacity  Int      @default(0)
+
+  flights   Flight[] // one airplane can operate many flights over time
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([model])
 }
 
 model City {
   id        Int       @id @default(autoincrement())
-  name      String    @unique
-  airports  Airport[]  // one city → many airports
+  name      String    @unique // city names should be unique in the system
+
+  airports  Airport[] // one city → many airports
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
 model Airport {
-  id      Int    @id @default(autoincrement())
-  name    String
-  address String
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String   @unique // example - airport code (e.g., GAU, DEL)
 
-  cityId  Int
-  city    City   @relation(fields: [cityId], references: [id],onDelete: Cascade)
+  cityId    Int
+  city      City     @relation(fields: [cityId],references: [id],onDelete: Cascade,onUpdate: Cascade) // deleting a city removes its airports
+
+  departingFlights Flight[] @relation("DepartureAirport") // flights leaving this airport
+  arrivingFlights  Flight[] @relation("ArrivalAirport")   // flights landing at this airport
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cityId])
+}
+
+model Flight {
+  id        Int      @id @default(autoincrement())
+  flightNumber String
+
+  airplaneId Int
+  airplane   Airplane @relation(fields: [airplaneId],references: [id],onDelete: Restrict,onUpdate: Cascade) // prevent deleting airplane if flights exist
+
+  departureAirportId Int
+  departureAirport   Airport @relation("DepartureAirport",fields: [departureAirportId],references: [id],onDelete: Restrict ) // cannot remove airport used in flights
+
+  arrivalAirportId Int
+  arrivalAirport   Airport @relation("ArrivalAirport",fields: [arrivalAirportId],references: [id],onDelete: Restrict)
+
+  departureTime DateTime
+  arrivalTime   DateTime
+
+  boardingGate  String
+  totalSeats    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([airplaneId])
+  @@index([departureAirportId])
+  @@index([arrivalAirportId])
+
+  @@unique([flightNumber, departureTime]) // same flight number allowed on different days
 }
