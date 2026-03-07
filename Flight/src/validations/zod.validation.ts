@@ -103,7 +103,6 @@ const flightBaseSchema = z.object({
   price: z.coerce.number().positive("price must be greater than 0"),
 });
 
-
 export const createFlightSchema = flightBaseSchema
   .refine((data) => data.departureAirportId !== data.arrivalAirportId, {
     message: "Departure and arrival airports cannot be the same",
@@ -113,7 +112,6 @@ export const createFlightSchema = flightBaseSchema
     message: "Arrival time must be after departure time",
     path: ["arrivalTime"],
   });
-
 
 export const updateFlightSchema = flightBaseSchema
   .partial()
@@ -135,3 +133,41 @@ export const updateFlightSchema = flightBaseSchema
 
 export type CreateFlightInput = z.infer<typeof createFlightSchema>;
 export type UpdateFlightInput = z.infer<typeof updateFlightSchema>;
+
+export const flightQuerySchema = z
+  .object({
+    departureAirportId: z.coerce.number().int().positive().optional(),
+    arrivalAirportId: z.coerce.number().int().positive().optional(),
+    airplaneId: z.coerce.number().int().positive().optional(),
+
+    minPrice: z.coerce
+      .number()
+      .refine((v) => !Number.isNaN(v), { message: "minPrice must be a number" })
+      .positive()
+      .optional(),
+
+    maxPrice: z.coerce
+      .number()
+      .refine((v) => !Number.isNaN(v), { message: "maxPrice must be a number" })
+      .positive()
+      .optional(),
+
+    startDate: z.coerce.date().optional(),
+    endDate: z.coerce.date().optional(),
+
+    boardingGate: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.minPrice && data.maxPrice) {
+        return data.maxPrice >= data.minPrice;
+      }
+      return true;
+    },
+    {
+      message: "maxPrice must be greater than or equal to minPrice",
+      path: ["maxPrice"],
+    },
+  );
+
+export type flightQueryInput = z.infer<typeof flightQuerySchema>;
