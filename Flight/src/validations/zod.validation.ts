@@ -2,6 +2,12 @@ import { z } from "zod";
 
 console.log(`inside validations`);
 
+export const IdSchema = z.object({
+  id: z.coerce.number().int().positive(),
+});
+
+// -------------------------Airplane Schema ----------------------------------
+
 // A runtime validator.
 // It checks data when the program runs
 export const createAirplaneSchema = z.object({
@@ -17,11 +23,9 @@ export const createAirplaneSchema = z.object({
 // It disappears after TypeScript compiles.
 export type CreateAirplaneInput = z.infer<typeof createAirplaneSchema>;
 
-export const IdSchema = z.object({
-  id: z.coerce.number().int().positive(),
-});
-
 export const updateAirplaneSchema = createAirplaneSchema.partial();
+
+// -------------------------City Schema ----------------------------------
 
 export const createCitySchema = z.object({
   name: z
@@ -34,6 +38,8 @@ export const createCitySchema = z.object({
 export type CreateCityInput = z.infer<typeof createCitySchema>;
 
 export const updateCitySchema = createCitySchema.partial();
+
+// -------------------------Airport Schema ----------------------------------
 
 export const createAirportSchema = z.object({
   name: z
@@ -55,3 +61,77 @@ export const updateAirportSchema = createAirportSchema.partial();
 
 export type CreateAirportInput = z.infer<typeof createAirportSchema>;
 export type UpdateAirportInput = z.infer<typeof updateAirportSchema>;
+
+// -------------------------Flight Schema ----------------------------------
+
+const flightBaseSchema = z.object({
+  flightNumber: z
+    .string()
+    .min(2, "Flight number is too short")
+    .max(10)
+    .regex(
+      /^[A-Z0-9]+$/,
+      "Flight number must contain only uppercase letters or numbers",
+    ),
+
+  airplaneId: z.coerce
+    .number()
+    .int("airplaneId must be an integer")
+    .positive("airplaneId must be a positive integer"),
+
+  departureAirportId: z.coerce
+    .number()
+    .int("departureAirportId must be an integer")
+    .positive("departureAirportId must be a positive integer"),
+
+  arrivalAirportId: z.coerce
+    .number()
+    .int("arrivalAirportId must be an integer")
+    .positive("arrivalAirportId must be a positive integer"),
+
+  departureTime: z.coerce.date(),
+
+  arrivalTime: z.coerce.date(),
+
+  boardingGate: z.string().min(1, "boardingGate is required").max(10),
+
+  totalSeats: z.coerce
+    .number()
+    .int("totalSeats must be an integer")
+    .positive("totalSeats must be a positive integer"),
+
+  price: z.coerce.number().positive("price must be greater than 0"),
+});
+
+
+export const createFlightSchema = flightBaseSchema
+  .refine((data) => data.departureAirportId !== data.arrivalAirportId, {
+    message: "Departure and arrival airports cannot be the same",
+    path: ["arrivalAirportId"],
+  })
+  .refine((data) => data.arrivalTime > data.departureTime, {
+    message: "Arrival time must be after departure time",
+    path: ["arrivalTime"],
+  });
+
+
+export const updateFlightSchema = flightBaseSchema
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided for update",
+  })
+  .refine(
+    (data) => {
+      if (data.arrivalTime && data.departureTime) {
+        return data.arrivalTime > data.departureTime;
+      }
+      return true;
+    },
+    {
+      message: "Arrival time must be after departure time",
+      path: ["arrivalTime"],
+    },
+  );
+
+export type CreateFlightInput = z.infer<typeof createFlightSchema>;
+export type UpdateFlightInput = z.infer<typeof updateFlightSchema>;

@@ -7,8 +7,6 @@ import { AppError } from "../utils/AppError.js";
 import { errorResponse } from "../utils/commonError.js";
 
 // POST : /cities
-// request body : { model: string, capacity: number }
-
 export async function createCityController(req: Request, res: Response) {
   try {
     const city = await createCity(req.body);

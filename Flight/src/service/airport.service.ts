@@ -1,6 +1,9 @@
 import status from "http-status";
 import { AppError } from "../utils/AppError.js";
-import type { CreateAirplaneInput, CreateAirportInput, UpdateAirportInput } from "../validations/zod.validation.js";
+import type {
+  CreateAirportInput,
+  UpdateAirportInput,
+} from "../validations/zod.validation.js";
 import AirportRepository from "../repositories/airport-respository.js";
 
 const airportRepository = new AirportRepository();
@@ -57,9 +60,8 @@ export async function deleteAirportById(id: number) {
     return await airportRepository.deleteById(id);
   } catch (error: unknown) {
     console.log(`delete error : ${error}`);
-    
+
     if (error instanceof AppError) {
-      
       if (error.statusCode === status.NOT_FOUND) {
         throw new AppError("Airport does not exist", status.NOT_FOUND);
       }
@@ -79,10 +81,7 @@ export async function deleteAirportById(id: number) {
   }
 }
 
-export async function updateAirportById(
-  id: number,
-  data: UpdateAirportInput,
-) {
+export async function updateAirportById(id: number, data: UpdateAirportInput) {
   try {
     return await airportRepository.updateById(id, data);
   } catch (error: unknown) {

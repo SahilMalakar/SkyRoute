@@ -65,6 +65,9 @@ model Flight {
   departureTime DateTime
   arrivalTime   DateTime
 
+  price         Decimal @db.Decimal(10,2) // NOT NULL flight ticket price
+
+
   boardingGate  String
   totalSeats    Int
 

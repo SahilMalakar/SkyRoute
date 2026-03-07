@@ -5,6 +5,7 @@ import { logger } from "./config/logger.js";
 import { airplaneRouter } from "./routes/v1/airplane.routes.js";
 import { cityRouter } from "./routes/v1/city.routes.js";
 import { airportRouter } from "./routes/v1/airport.routes.js";
+import { flightRouter } from "./routes/v1/Flight.routes.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ console.log(`inside root index.ts`);
 app.use("/api/v1", airplaneRouter);
 app.use("/api/v1", cityRouter);
 app.use("/api/v1", airportRouter);
+app.use("/api/v1", flightRouter);
 
 app.listen(config.port, () => {
   console.log(`successfully started the server on port : ${config.port}`);
