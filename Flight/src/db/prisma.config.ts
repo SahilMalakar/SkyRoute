@@ -2,7 +2,6 @@ import { defineConfig } from "prisma/config";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import { log } from "console";
 
 /**
  * Fix __dirname for ESM

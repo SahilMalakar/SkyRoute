@@ -7,14 +7,13 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model Airplane {
   id        Int      @id @default(autoincrement())
   model     String
   capacity  Int      @default(0)
 
   flights   Flight[] // one airplane can operate many flights over time
-
+  seat      Seat[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -67,9 +66,10 @@ model Flight {
 
   price         Decimal @db.Decimal(10,2) // NOT NULL flight ticket price
 
-
   boardingGate  String
   totalSeats    Int    // total available seats
+
+  seats         Seat[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,4 +79,29 @@ model Flight {
   @@index([arrivalAirportId])
 
   @@unique([flightNumber, departureTime]) // same flight number allowed on different days
+}
+
+model Seat {
+  id         Int  @id @default(autoincrement())
+
+  rowNumber  Int     //row
+  seatLetter String  //column 
+
+  seatType   SeatType @default(ECONOMY)
+
+  airplaneId Int
+  airplane   Airplane @relation(fields: [airplaneId],references: [id],onDelete: Restrict,onUpdate: Cascade)
+
+  flightId   Int
+  flight     Flight @relation(fields: [flightId],references: [id],onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SeatType {
+  ECONOMY
+  PREMIUM_ECONOMY
+  BUSINESS
+  FIRST
 }
