@@ -28,50 +28,93 @@ export async function createFlight(data: CreateFlightInput) {
 
 // had to amke this filter more robust
 export async function getAllFlightByFilter(query: flightQueryInput) {
-  const customFilter: Prisma.FlightWhereInput = {};
-  if (query.departureAirportId) {
-    customFilter.departureAirportId = query.departureAirportId;
+  const customFilter: Prisma.FlightWhereInput = {
+    AND: [],
+  };
+
+  const andFilters = customFilter.AND as Prisma.FlightWhereInput[];
+
+  if (query.trips) {
+    const routes = query.trips.split(",");
+
+    andFilters.push({
+      OR: routes.map((route) => {
+        const [departureCode, arrivalCode] = route.split("-") as [
+          string,
+          string,
+        ];
+
+        return {
+          departureAirport: { code: departureCode },
+          arrivalAirport: { code: arrivalCode },
+        };
+      }),
+    });
   }
 
-  if (query.arrivalAirportId) {
-    customFilter.arrivalAirportId = query.arrivalAirportId;
+  if (query.price) {
+    const [minPrice, maxPrice] = query.price.split("-").map(Number) as [
+      number,
+      number,
+    ];
+
+    andFilters.push({
+      price: {
+        gte: minPrice ? minPrice : 0,
+        lte: maxPrice ? maxPrice : 1000000,
+      },
+    });
   }
 
-  if (query.airplaneId) {
-    customFilter.airplaneId = query.airplaneId;
+  // totalSeats >= travellers
+  if (query.travellers !== undefined) {
+    andFilters.push({
+      totalSeats: {
+        gte: query.travellers,
+      },
+    });
   }
 
-  if (query.boardingGate) {
-    customFilter.boardingGate = query.boardingGate;
+  // a time range covering the whole day.
+  if (query.tripDate) {
+    const dateStr = query.tripDate;
+
+    const year = Number(dateStr.slice(0, 4));
+    const month = Number(dateStr.slice(4, 6)) - 1;
+    const day = Number(dateStr.slice(6, 8));
+
+    const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+
+    andFilters.push({
+      departureTime: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    });
   }
 
-  if (query.minPrice !== undefined || query.maxPrice !== undefined) {
-    customFilter.price = {};
+  let orderBy: Prisma.FlightOrderByWithRelationInput[] | undefined;
 
-    if (query.minPrice !== undefined) {
-      customFilter.price.gte = query.minPrice;
-    }
+  // if two fields contradict logically, the database simply follows priority.
+  if (query.sort) {
+    const sortFields = query.sort.split(",");
 
-    if (query.maxPrice !== undefined) {
-      customFilter.price.lte = query.maxPrice;
-    }
-  }
+    orderBy = sortFields.map((sortItem) => {
+      const [field, direction] = sortItem.split("_") as [
+        keyof Prisma.FlightOrderByWithRelationInput,
+        "asc" | "desc",
+      ];
 
-  if (query.startDate || query.endDate) {
-    customFilter.departureTime = {};
-
-    if (query.startDate) {
-      customFilter.departureTime.gte = query.startDate;
-    }
-
-    if (query.endDate) {
-      customFilter.departureTime.lte = query.endDate;
-    }
+      return {
+        [field]: direction,
+      };
+    });
   }
   console.log(`service layer , customFilter : ${JSON.stringify(customFilter)}`);
 
   try {
-    return await flightRepository.getAllFlights(customFilter);
+    return await flightRepository.getAllFlights(customFilter, orderBy);
   } catch (error) {
     console.log(`service layer , error : ${error}`);
 

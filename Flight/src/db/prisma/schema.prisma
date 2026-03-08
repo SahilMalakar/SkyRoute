@@ -69,7 +69,7 @@ model Flight {
 
 
   boardingGate  String
-  totalSeats    Int
+  totalSeats    Int    // total available seats
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

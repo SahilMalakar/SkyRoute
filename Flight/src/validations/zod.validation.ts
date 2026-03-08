@@ -139,34 +139,50 @@ export const flightQuerySchema = z
     departureAirportId: z.coerce.number().int().positive().optional(),
     arrivalAirportId: z.coerce.number().int().positive().optional(),
     airplaneId: z.coerce.number().int().positive().optional(),
+    travellers: z.coerce.number().int().positive().optional(),
 
-    minPrice: z.coerce
-      .number()
-      .refine((v) => !Number.isNaN(v), { message: "minPrice must be a number" })
-      .positive()
+    price: z
+      .string()
+      .regex(/^\d+-\d+$/, "Format: min-max (example: 3000-40000)")
       .optional(),
 
-    maxPrice: z.coerce
-      .number()
-      .refine((v) => !Number.isNaN(v), { message: "maxPrice must be a number" })
-      .positive()
+    tripDate: z
+      .string()
+      .regex(/^\d{8}$/, "Format must be YYYYMMDD")
       .optional(),
-
-    startDate: z.coerce.date().optional(),
-    endDate: z.coerce.date().optional(),
 
     boardingGate: z.string().optional(),
+
+    trips: z
+      .string()
+      .regex(
+        /^([A-Z]{3}-[A-Z]{3})(,[A-Z]{3}-[A-Z]{3})*$/,
+        "Format: XXX-YYY or XXX-YYY,AAA-BBB",
+      )
+      .optional(),
+
+    sort: z
+      .string()
+      .regex(
+        /^((price|departureTime|arrivalTime)_(asc|desc))(,((price|departureTime|arrivalTime)_(asc|desc)))*$/,
+        "Format: field_order,field_order (example: price_asc,departureTime_desc)",
+      )
+      .optional(),
   })
   .refine(
     (data) => {
-      if (data.minPrice && data.maxPrice) {
-        return data.maxPrice >= data.minPrice;
-      }
-      return true;
+      if (!data.price) return true;
+
+      // skip refine if regex format is invalid
+      if (!/^\d+-\d+$/.test(data.price)) return true;
+
+      const [min, max] = data.price.split("-").map(Number) as [number, number];
+
+      return min <= max;
     },
     {
-      message: "maxPrice must be greater than or equal to minPrice",
-      path: ["maxPrice"],
+      message: "max price must be greater than or equal to min price",
+      path: ["price"],
     },
   );
 
