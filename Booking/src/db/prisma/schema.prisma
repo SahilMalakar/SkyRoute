@@ -7,9 +7,28 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id  Int @id @default(autoincrement())
-  email String @unique
-  name  String
-  passwor String
+model Booking {
+  id        Int      @id @default(autoincrement())
+
+  flightId  Int
+  userId    Int
+  noOfSeats Int      @default(1)
+
+  status    Status   @default(PENDING)
+
+  totalCost Decimal  @db.Decimal(10,2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([flightId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum Status {
+  INITIATED
+  CONFIRMED
+  PENDING
+  CANCELLED
 }
