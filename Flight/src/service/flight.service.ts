@@ -4,6 +4,7 @@ import FlightRepository from "../repositories/flight-respository.js";
 import type {
   CreateFlightInput,
   flightQueryInput,
+  updateRemainingSeatsTypes,
 } from "../validations/zod.validation.js";
 import type { Prisma } from "../db/generated/prisma/client.js";
 
@@ -126,19 +127,40 @@ export async function getAllFlightByFilter(query: flightQueryInput) {
   }
 }
 
+export async function getFlightById(id: number) {
+  try {
+    return await flightRepository.findById(id);
+  } catch (error: unknown) {
+    if (error instanceof AppError) {
+      throw error;
+    }
 
-export async function getFlightById(id:number) {
-   try {
-     return await flightRepository.findById(id)
-   } catch (error: unknown) {
-     if (error instanceof AppError) {
-       throw error;
-     }
-
-     throw new AppError("Cannot fetch flight", status.INTERNAL_SERVER_ERROR);
-   }
+    throw new AppError("Cannot fetch flight", status.INTERNAL_SERVER_ERROR);
+  }
 }
 
+export async function updateSeats(id: number, data: updateRemainingSeatsTypes) {
+  try {
+    console.log(`updateSeatsService : ${JSON.stringify(data)}`);
+
+    return await flightRepository.updateRemainingSeats(
+      id,
+      data.seats,
+      data.dec,
+    );
+  } catch (error) {
+    console.log(`update Seat error : ${error}`);
+
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    throw new AppError(
+      "Cannot Update flight Seats",
+      status.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
 // export async function getFlight() {
 //   try {
 //     return await flightRepository.findAll();

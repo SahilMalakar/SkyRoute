@@ -4,6 +4,7 @@ import {
   createFlight,
   getAllFlightByFilter,
   getFlightById,
+  updateSeats,
 } from "../service/flight.service.js";
 import { successResponse } from "../utils/commonSuccess.js";
 import { AppError } from "../utils/AppError.js";
@@ -62,6 +63,29 @@ export async function getFlightsByIdController(req: Request, res: Response) {
     return res
       .status(status.OK)
       .json(successResponse(airplane, "Flights fetched successfully"));
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res
+        .status(error.statusCode)
+        .json(errorResponse(error.message, error));
+    }
+
+    return res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json(errorResponse("Something went wrong", error));
+  }
+}
+
+export async function updateSeatsController(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    console.log(`updateSeatsController : ${JSON.stringify(req.body)}`);
+
+    const flight = await updateSeats(Number(id), req.body);
+
+    return res
+      .status(status.OK)
+      .json(successResponse(flight, "Flights Seat Updated successfully"));
   } catch (error) {
     if (error instanceof AppError) {
       return res

@@ -48,5 +48,44 @@ export default class FlightRepository extends CrudRepository<
 
     return response;
   }
-}
 
+  async updateRemainingSeats(
+    flightId: number,
+    seats: number,
+    dec: boolean = true,
+  ) {
+    if (dec) {
+      const result = await prisma.flight.updateMany({
+        where: {
+          id: flightId,
+          totalSeats: {
+            gte: seats,
+          },
+        },
+        data: {
+          totalSeats: {
+            decrement: seats,
+          },
+        },
+      });
+
+      if (result.count === 0) {
+        throw new Error("Not enough seats available");
+      }
+
+      return result;
+    }
+
+    // increment seats (used for cancellation)
+    return await prisma.flight.update({
+      where: {
+        id: flightId,
+      },
+      data: {
+        totalSeats: {
+          increment: seats,
+        },
+      },
+    });
+  }
+}

@@ -187,3 +187,17 @@ export const flightQuerySchema = z
   );
 
 export type flightQueryInput = z.infer<typeof flightQuerySchema>;
+
+export const updateRemainingSeatsSchema = z.object({
+  seats: z
+    .number()
+    .int()
+    .positive()
+    .max(10, "Cannot update more than 10 seats at once"),
+
+  dec: z.boolean().optional().default(true),
+});
+
+export type updateRemainingSeatsTypes = z.infer<
+  typeof updateRemainingSeatsSchema
+>;
