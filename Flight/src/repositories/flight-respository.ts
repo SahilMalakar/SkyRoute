@@ -54,38 +54,50 @@ export default class FlightRepository extends CrudRepository<
     seats: number,
     dec: boolean = true,
   ) {
-    if (dec) {
-      const result = await prisma.flight.updateMany({
+    return await prisma.$transaction(async (tx) => {
+      // lock the flight row
+      const flights = await tx.$queryRaw<{ id: number; totalSeats: number }[]>`
+      SELECT id, "totalSeats"
+      FROM "Flight"
+      WHERE id = ${flightId}
+      FOR UPDATE
+    `;
+
+      const [flight] = flights;
+
+      if (!flight) {
+        throw new Error("Flight not found");
+      }
+
+      if (dec) {
+        if (flight.totalSeats < seats) {
+          throw new Error("Not enough seats available");
+        }
+
+        // decrement seats
+        return await tx.flight.update({
+          where: {
+            id: flightId,
+          },
+          data: {
+            totalSeats: {
+              decrement: seats,
+            },
+          },
+        });
+      }
+
+      // increment seats (for cancellation)
+      return await tx.flight.update({
         where: {
           id: flightId,
-          totalSeats: {
-            gte: seats,
-          },
         },
         data: {
           totalSeats: {
-            decrement: seats,
+            increment: seats,
           },
         },
       });
-
-      if (result.count === 0) {
-        throw new Error("Not enough seats available");
-      }
-
-      return result;
-    }
-
-    // increment seats (used for cancellation)
-    return await prisma.flight.update({
-      where: {
-        id: flightId,
-      },
-      data: {
-        totalSeats: {
-          increment: seats,
-        },
-      },
     });
   }
 }
