@@ -4,4 +4,5 @@ dotenv.config();
 
 export const config = Object.freeze({
   port: process.env.PORT ? Number(process.env.PORT) : 3000,
+  flight_service_url: process.env.FLIGHT_SERVICE_URL,
 });
