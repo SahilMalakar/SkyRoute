@@ -3,6 +3,7 @@ import status from "http-status";
 import {
   createFlight,
   getAllFlightByFilter,
+  getFlightById,
 } from "../service/flight.service.js";
 import { successResponse } from "../utils/commonSuccess.js";
 import { AppError } from "../utils/AppError.js";
@@ -41,6 +42,26 @@ export async function getAllFlightByFilterController(
     const flight = await getAllFlightByFilter(query);
 
     return res.status(status.CREATED).json(successResponse(flight));
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res
+        .status(error.statusCode)
+        .json(errorResponse(error.message, error));
+    }
+
+    return res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json(errorResponse("Something went wrong", error));
+  }
+}
+
+export async function getFlightsByIdController(req: Request, res: Response) {
+  try {
+    const airplane = await getFlightById(Number(req.params.id));
+
+    return res
+      .status(status.OK)
+      .json(successResponse(airplane, "Flights fetched successfully"));
   } catch (error) {
     if (error instanceof AppError) {
       return res

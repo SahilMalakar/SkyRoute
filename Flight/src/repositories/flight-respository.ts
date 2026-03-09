@@ -49,3 +49,4 @@ export default class FlightRepository extends CrudRepository<
     return response;
   }
 }
+

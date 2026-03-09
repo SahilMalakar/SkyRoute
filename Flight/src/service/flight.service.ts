@@ -126,6 +126,19 @@ export async function getAllFlightByFilter(query: flightQueryInput) {
   }
 }
 
+
+export async function getFlightById(id:number) {
+   try {
+     return await flightRepository.findById(id)
+   } catch (error: unknown) {
+     if (error instanceof AppError) {
+       throw error;
+     }
+
+     throw new AppError("Cannot fetch flight", status.INTERNAL_SERVER_ERROR);
+   }
+}
+
 // export async function getFlight() {
 //   try {
 //     return await flightRepository.findAll();
